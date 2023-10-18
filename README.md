@@ -7,3 +7,7 @@ We-Wingit is a dummy project. It is a chatbot, that uses a customer service data
 ## Reason:
 
 The project is a dummy project, used to apply the knowledge I have learnt about Open AI API, more specifically, using a dataset to make a trained module based on it.
+
+## Live Demo:
+
+You can [click here](https://we-wingit-kret-qkb86pfoy-williamferns1.vercel.app/) see a live demo.
