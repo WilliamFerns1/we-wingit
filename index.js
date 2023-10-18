@@ -15,7 +15,7 @@ async function fetchReply() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        },
+        }, 
         body: JSON.stringify({ conversation: conversationStr }),
     });
 
