@@ -25,7 +25,7 @@ document.addEventListener('submit', (e) => {
 
 async function fetchReply(){
     const response = await openai.createCompletion({
-        model: 'davinci:ft-scrimba-2023-03-30-23-10-03',
+        model: 'gpt-3.5-turbo-instruct',
         prompt: conversationStr,
         presence_penalty: 0,
         frequency_penalty: 0.3,
