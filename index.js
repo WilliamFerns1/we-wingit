@@ -1,55 +1,54 @@
-import { Configuration, OpenAIApi } from 'openai'
+const chatbotConversation = document.getElementById('chatbot-conversation');
+let conversationStr = '';
 
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-})
+document.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const userInput = document.getElementById('user-input');
+    conversationStr += `${userInput.value} -> `;
+    addHumanSpeechBubble(userInput.value);
+    userInput.value = '';
+    fetchReply();
+});
 
-const openai = new OpenAIApi(configuration)
+async function fetchReply() {
+    const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ conversation: conversationStr }),
+    });
 
-const chatbotConversation = document.getElementById('chatbot-conversation')
- 
-let conversationStr = ''
- 
-document.addEventListener('submit', (e) => {
-    e.preventDefault()
-    const userInput = document.getElementById('user-input') 
-    conversationStr += ` ${userInput.value} ->`
-    fetchReply()
-    const newSpeechBubble = document.createElement('div')
-    newSpeechBubble.classList.add('speech', 'speech-human')
-    chatbotConversation.appendChild(newSpeechBubble)
-    newSpeechBubble.textContent = userInput.value
-    userInput.value = ''
-    chatbotConversation.scrollTop = chatbotConversation.scrollHeight
-}) 
+    if (response.status === 200) {
+        const responseData = await response.json();
+        const replyText = responseData.response.data.choices[0].text;
+        conversationStr += `${replyText} \n`;
+        renderTypewriterText(replyText);
+    } else {
+        console.error('Error calling OpenAI API');
+    }
+}
 
-async function fetchReply(){
-    const response = await openai.createCompletion({
-        model: 'gpt-3.5-turbo-instruct',
-        prompt: conversationStr,
-        presence_penalty: 0,
-        frequency_penalty: 0.3,
-        max_tokens: 100,
-        temperature: 0,
-        stop: ['\n', '->']
-    })
-    conversationStr += ` ${response.data.choices[0].text} \n`
-    renderTypewriterText(response.data.choices[0].text)
-    console.log(conversationStr)
+function addHumanSpeechBubble(text) {
+    const newSpeechBubble = document.createElement('div');
+    newSpeechBubble.classList.add('speech', 'speech-human');
+    chatbotConversation.appendChild(newSpeechBubble);
+    newSpeechBubble.textContent = text;
+    chatbotConversation.scrollTop = chatbotConversation.scrollHeight;
 }
 
 function renderTypewriterText(text) {
-    const newSpeechBubble = document.createElement('div')
-    newSpeechBubble.classList.add('speech', 'speech-ai', 'blinking-cursor')
-    chatbotConversation.appendChild(newSpeechBubble)
-    let i = 0
+    const newSpeechBubble = document.createElement('div');
+    newSpeechBubble.classList.add('speech', 'speech-ai', 'blinking-cursor');
+    chatbotConversation.appendChild(newSpeechBubble);
+    let i = 0;
     const interval = setInterval(() => {
-        newSpeechBubble.textContent += text.slice(i-1, i)
-        if (text.length === i) {
-            clearInterval(interval)
-            newSpeechBubble.classList.remove('blinking-cursor')
+        newSpeechBubble.textContent += text[i];
+        if (i === text.length - 1) {
+            clearInterval(interval);
+            newSpeechBubble.classList.remove('blinking-cursor');
         }
-        i++
-        chatbotConversation.scrollTop = chatbotConversation.scrollHeight
-    }, 50)
+        i++;
+        chatbotConversation.scrollTop = chatbotConversation.scrollHeight;
+    }, 50);
 }
